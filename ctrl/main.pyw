@@ -1,7 +1,9 @@
 import tkinter
+from tkinter import *
 import tkinter.messagebox
 import struct
 import socket
+from turtle import color
 import numpy as np
 from PIL import Image, ImageTk
 import threading
@@ -12,6 +14,14 @@ import sys
 import platform
 
 root = tkinter.Tk()
+
+
+root.title("YourViewer")
+
+root.iconbitmap(r'../img/desktop.ico')
+root.geometry("900x600")
+root.configure(bg="#1c1f28")
+
 
 # 画面周期
 IDLE = 0.05
@@ -147,12 +157,22 @@ def ShowScreen():
         showcan.destroy()
 
 
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(("8.8.8.8", 80))
+ip = s.getsockname()[0]
 val = tkinter.StringVar()
+
 host_lab = tkinter.Label(root, text="Host:")
+
 host_en = tkinter.Entry(root, show=None, font=('Arial', 14), textvariable=val)
+
+ip_lab = tkinter.Label(root, text="Your IP:")
+ips = tkinter.Label(root, text=ip)
+
 sca_lab = tkinter.Label(root, text="Scale:")
 sca = tkinter.Scale(root, from_=10, to=100, orient=tkinter.HORIZONTAL, length=100,
                     showvalue=100, resolution=0.1, tickinterval=50, command=SetScale)
+
 proxy_btn = tkinter.Button(root, text="Proxy", command=ShowProxy)
 show_btn = tkinter.Button(root, text="Show", command=ShowScreen)
 
@@ -160,8 +180,10 @@ host_lab.grid(row=0, column=0, padx=10, pady=10, ipadx=0, ipady=0)
 host_en.grid(row=0, column=1, padx=0, pady=0, ipadx=40, ipady=0)
 sca_lab.grid(row=1, column=0, padx=10, pady=10, ipadx=0, ipady=0)
 sca.grid(row=1, column=1, padx=0, pady=0, ipadx=100, ipady=0)
-proxy_btn.grid(row=2, column=0, padx=0, pady=10, ipadx=30, ipady=0)
-show_btn.grid(row=2, column=1, padx=0, pady=10, ipadx=30, ipady=0)
+ip_lab.grid(row=2, column=0, padx=10, pady=10, ipadx=0, ipady=0)
+ips.grid(row=2, column=1, padx=0, pady=0, ipadx=100, ipady=0)
+proxy_btn.grid(row=3, column=0, padx=0, pady=10, ipadx=30, ipady=0)
+show_btn.grid(row=3, column=1, padx=0, pady=10, ipadx=30, ipady=0)
 sca.set(100)
 val.set('127.0.0.1:80')
 
@@ -206,6 +228,7 @@ def BindEvents(canvas):
     elif PLAT == b'x11':
         def WheelDown(e):
             return EventDo(struct.pack('>BBHH', 2, 0, int(e.x/scale), int(e.y/scale)))
+
         def WheelUp(e):
             return EventDo(struct.pack('>BBHH', 2, 1, int(e.x/scale), int(e.y/scale)))
         canvas.bind(sequence="<Button-4>", func=WheelUp)
