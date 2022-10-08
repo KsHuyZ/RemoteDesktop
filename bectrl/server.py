@@ -1,3 +1,4 @@
+from asyncio import start_server
 import struct
 import socket
 from PIL import ImageGrab
@@ -8,20 +9,39 @@ import time
 import pyautogui as ag
 import mouse
 from _keyboard import getKeycodeMapping
+from vidstream import *
 
+
+port = 9999
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(("8.8.8.8", 80))
+ip = s.getsockname()[0]
+server = StreamingServer(ip, port)
+receiver = AudioReceiver(ip,8888)
+
+def startCall():
+    t1 = threading.Thread(target=server.start_server)
+    t2 = threading.Thread(receiver,start_server)
+    t1.start()
+    t2.start()
+
+ 
 # 画面周期
 IDLE = 0.05
 
-# 鼠标滚轮灵敏度
+# Mouse wheel sensitivity
 SCROLL_NUM = 5
 
 bufsize = 1024
 
 host = ('0.0.0.0', 80)
+# A TCP based echo server
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Bind the IP address and the port number
 soc.bind(host)
+# listen for incoming connections
 soc.listen(1)
-# 压缩比 1-100 数值越小，压缩比越高，图片质量损失越严重
+# Compression ratio 1-100 The smaller the value, the higher the compression ratio and the more serious the loss of image quality.
 IMQUALITY = 50
 
 lock = threading.Lock()
@@ -33,39 +53,42 @@ lock = threading.Lock()
 # elif sys.platform == "darwin":
 #     from ._keyboard_osx import keycodeMapping
 
+# ctrl device by listen action by socket
+
 
 def ctrl(conn):
     '''
-    读取控制命令，并在本机还原操作
+    Read control commands and restore operations locally
     '''
     keycodeMapping = {}
+
     def Op(key, op, ox, oy):
         # print(key, op, ox, oy)
         if key == 4:
-            # 鼠标移动
+            # mouse move
             mouse.move(ox, oy)
         elif key == 1:
             if op == 100:
-                # 左键按下
+                # left mouse down
                 ag.mouseDown(button=ag.LEFT)
             elif op == 117:
-                # 左键弹起
+                # left mouse up
                 ag.mouseUp(button=ag.LEFT)
         elif key == 2:
-            # 滚轮事件
+            # scroll
             if op == 0:
-                # 向上
+                # up
                 ag.scroll(-SCROLL_NUM)
             else:
-                # 向下
+                # down
                 ag.scroll(SCROLL_NUM)
         elif key == 3:
-            # 鼠标右键
+            # mousse right click
             if op == 100:
-                # 右键按下
+                # mousse right click
                 ag.mouseDown(button=ag.RIGHT)
             elif op == 117:
-                # 右键弹起
+                # none
                 ag.mouseUp(button=ag.RIGHT)
         else:
             k = keycodeMapping.get(key)
@@ -98,9 +121,9 @@ def ctrl(conn):
         return
 
 
-# 压缩后np图像
+# compressed np image
 img = None
-# 编码后的图像
+# encoded image
 imbyt = None
 
 
@@ -126,26 +149,26 @@ def handle(conn):
             ".jpg", imgnpn, [cv2.IMWRITE_JPEG_QUALITY, IMQUALITY])
         imnp = np.asarray(timbyt, np.uint8)
         imgnew = cv2.imdecode(imnp, cv2.IMREAD_COLOR)
-        # 计算图像差值
+        # Calculate image difference
         imgs = imgnew ^ img
         if (imgs != 0).any():
-            # 画质改变
+            # image quality change
             pass
         else:
             continue
         imbyt = timbyt
         img = imgnew
-        # 无损压缩
+        # lossless compression
         _, imb = cv2.imencode(".png", imgs)
-        l1 = len(imbyt)  # 原图像大小
-        l2 = len(imb)  # 差异图像大小
+        l1 = len(imbyt)  # original image size
+        l2 = len(imb)  # difference image size
         if l1 > l2:
-            # 传差异化图像
+            # transmit differentiated images
             lenb = struct.pack(">BI", 0, l2)
             conn.sendall(lenb)
             conn.sendall(imb)
         else:
-            # 传原编码图像
+            # Pass the original encoded image
             lenb = struct.pack(">BI", 1, l1)
             conn.sendall(lenb)
             conn.sendall(imbyt)
@@ -155,3 +178,5 @@ while True:
     conn, addr = soc.accept()
     threading.Thread(target=handle, args=(conn,)).start()
     threading.Thread(target=ctrl, args=(conn,)).start()
+    if soc.close():
+        break
