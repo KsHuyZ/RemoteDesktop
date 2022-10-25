@@ -36,17 +36,6 @@ root.geometry("1200x600")
 root.configure(bg="#1e1e1e")
 
 
-def startCamera():
-    camera_client = CameraClient(text_target_ip.get(1.0, 'enc-1c'), 7777)
-    t3 = threading.Thread(target=camera_client.start_stream)
-    t3.start()
-
-
-def startAudio():
-    audio_sender = AudioSender(text_target_ip.get(1.0, 'enc-1c'), 6666)
-    t4 = threading.Thread(target=audio_sender.start_stream)
-    t4.start()
-
 # layout config
 
 
@@ -125,9 +114,6 @@ elif platform.system() == "Linux":
 # Create socket
 
 
-
-
-
 def SetSocket(hs):
     global soc, host_en
 
@@ -161,11 +147,6 @@ def ShowProxy():
     s5_en.grid(row=0, column=1, padx=10, pady=10, ipadx=40, ipady=0)
     s5_btn.grid(row=1, column=0, padx=10, pady=10, ipadx=30, ipady=0)
     s5v.set("127.0.0.1:88")
-
-
-
-
-
 
 
 def ShowScreen():
@@ -246,7 +227,6 @@ host_en.grid(row=1, column=0)
 show_btn = tkinter.Button(ipControlContent_frame,
                           text="Show", command=ShowScreen, font=(nunitoFont), fg="white", bg="#515092", border=None, cursor="hand2")
 show_btn.grid(row=5, column=0, padx=10, pady=20)
-start_cam = tkinter.Button(ipConnectContent_frame, text="Call Chat")
 
 
 # host_lab = tkinter.Label(root, text="Host:")
@@ -279,8 +259,6 @@ sca.grid(row=4, column=0, padx=0, pady=0, ipadx=100, ipady=0)
 sca.set(50)
 val.set('127.0.0.1:80')
 last_send = time.time()
-
-
 
 
 
@@ -352,21 +330,6 @@ def BindEvents(canvas):
     canvas.bind(sequence="<KeyRelease>", func=KeyUp)
 
 
-def startCamera():
-    host = host_en.get(1.0,'enc-1c')
-    hs = host.split(":")
-    camera_client = CameraClient(hs[0],7777)
-    t3 = threading.Thread(target=camera_client.start_stream)
-    t3.start()
-def startAudio():
-    host = host_en.get(1.0,'enc-1c')
-    hs = host.split(":")
-    audio_sender = AudioSender(hs[0],6666)
-    t4 = threading.Thread(target=audio_sender.start_stream)
-    t4.start()   
-
-
-
 def run():
     global wscale, fixh, fixw, soc, showcan
     host = host_en.get()
@@ -420,10 +383,10 @@ def run():
             data = np.frombuffer(imb, dtype=np.uint8)
             ims = cv2.imdecode(data, cv2.IMREAD_COLOR)
             if imtype == 1:
-                
+
                 img = ims
             else:
-              
+
                 img = img ^ ims
             imt = cv2.resize(img, (w, h))
             imsh = cv2.cvtColor(imt, cv2.COLOR_RGB2RGBA)
@@ -433,9 +396,6 @@ def run():
             showcan = None
             ShowScreen()
             return
-
-
-
 
 
 root.mainloop()
