@@ -1,4 +1,5 @@
 from ast import Str
+from email import message
 from math import radians
 from msilib.schema import Error
 import tkinter
@@ -16,13 +17,15 @@ from cv2 import cv2
 import time
 import sys
 import platform
-
+import pyperclip
+from plyer import notification
 
 root = tkinter.Tk()
 
 nunitoFont = "Nunito 13 bold"
 
 # get ip
+
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.connect(("8.8.8.8", 80))
@@ -32,14 +35,20 @@ val = tkinter.StringVar()
 root.title("YourViewer")
 
 root.iconbitmap(r'../img/desktop.ico')
-root.geometry("1200x600")
+root.geometry("800x600")
 root.configure(bg="#1e1e1e")
 
 
+#import image
+connect_icon = PhotoImage(file="../img/connect.png")
+size_icon = PhotoImage(file="../img/size.png")
+ip_icon = PhotoImage(file="../img/ip.png")
+transfer_icon = PhotoImage(file="../img/transfer.png")
+copy_icon = PhotoImage(file="../img/copy.png")
+
+
 # layout config
-
-
-right_frame = Frame(root, width=1200, bg="#1e1e1e")
+right_frame = Frame(root, width=800, bg="#1e1e1e")
 right_frame.grid(row=0, column=0)
 
 
@@ -53,8 +62,9 @@ Label(ipConnectTitle_frame, text="Allow Remote Control",  fg="white", bg="#1e1e1
 ipConnectContent_frame = Frame(ipConnect_frame, width=190, height=600,
                                bg="#252526")
 ipConnectContent_frame.grid(row=1, column=0, ipadx=20, ipady=5)
-Label(ipConnectContent_frame, text="Your IP:", fg="white", bg="#252526",
-      font=(nunitoFont)).grid(row=0, column=0)
+Label(ipConnectContent_frame, text="Your IP :", image=ip_icon, fg="white", bg="#252526",
+      font=(nunitoFont), compound=LEFT).grid(row=0, column=0)
+
 Label(ipConnectContent_frame, text=ip, fg="white", bg="#252526",
       font=("Nunito 16 bold")).grid(row=1, column=0, padx=10, pady=5)
 
@@ -70,8 +80,8 @@ Label(ipControlTitle_frame, text="Control Remote Computer",  fg="white", bg="#1e
 ipControlContent_frame = Frame(ipControl_frame, width=190, height=200,
                                bg="#252526")
 ipControlContent_frame.grid(row=1, column=0, ipadx=20, ipady=5)
-Label(ipControlContent_frame, text="Partner IP:", fg="white", bg="#252526",
-      font=(nunitoFont)).grid(row=0, column=0)
+Label(ipControlContent_frame, text=" Partner IP :", image=transfer_icon, fg="white", bg="#252526",
+      font=(nunitoFont), compound=LEFT).grid(row=0, column=0)
 
 
 # img/s
@@ -120,6 +130,16 @@ def SetSocket(hs):
     # create socket connect
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.connect((hs[0], int(hs[1])))
+
+
+def Copy():
+    pyperclip.copy(ip+":80")
+    notification.notify(title="Copy", message="Copy to cliboard",
+                        app_icon="../img/desktop.ico", app_name="YourViewer", timeout=10)
+
+
+Button(ipConnectContent_frame,  text="Copy", width=120, image=copy_icon, command=Copy, font=(
+    nunitoFont), fg="white", bg="#515092", border=None, cursor="hand2", compound=LEFT).grid(row=2, column=0)
 
 
 def SetScale(x):
@@ -224,9 +244,9 @@ def ShowScreen():
 host_en = tkinter.Entry(ipControlContent_frame, show=None,
                         font=('Nunito', 14), textvariable=val)
 host_en.grid(row=1, column=0)
-show_btn = tkinter.Button(ipControlContent_frame,
-                          text="Show", command=ShowScreen, font=(nunitoFont), fg="white", bg="#515092", border=None, cursor="hand2")
-show_btn.grid(row=5, column=0, padx=10, pady=20)
+show_btn = tkinter.Button(ipControlContent_frame,  text="Connect", width=180, image=connect_icon, command=ShowScreen, font=(
+    nunitoFont), fg="white", bg="#515092", border=None, cursor="hand2", compound=LEFT)
+show_btn.grid(row=5, column=0, padx=10, pady=30)
 
 
 # host_lab = tkinter.Label(root, text="Host:")
@@ -234,8 +254,8 @@ show_btn.grid(row=5, column=0, padx=10, pady=20)
 # host_en = tkinter.Entry(root, show=None, font=('Arial', 14), textvariable=val)
 
 
-sca_lab = tkinter.Label(ipControlContent_frame, text="Scale:",
-                        font=nunitoFont, bg="#252526", fg="white")
+sca_lab = tkinter.Label(ipControlContent_frame, text=" Scale :", image=size_icon,
+                        font=nunitoFont, bg="#252526", fg="white", compound=LEFT)
 sca = tkinter.Scale(ipControlContent_frame, from_=10, to=100, orient=tkinter.HORIZONTAL, length=100,
                     showvalue=100, resolution=0.1, tickinterval=50, command=SetScale, bg="#515092", fg="white", font=nunitoFont)
 
@@ -259,9 +279,6 @@ sca.grid(row=4, column=0, padx=0, pady=0, ipadx=100, ipady=0)
 sca.set(50)
 val.set('127.0.0.1:80')
 last_send = time.time()
-
-
-
 
 
 def BindEvents(canvas):

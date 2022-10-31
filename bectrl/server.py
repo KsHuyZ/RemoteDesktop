@@ -9,21 +9,15 @@ import time
 import pyautogui as ag
 import mouse
 from _keyboard import getKeycodeMapping
-from vidstream import *
+
 
 
 port = 9999
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.connect(("8.8.8.8", 80))
 ip = s.getsockname()[0]
-server = StreamingServer(ip, port)
-receiver = AudioReceiver(ip,8888)
 
-def startCall():
-    t1 = threading.Thread(target=server.start_server)
-    t2 = threading.Thread(receiver,start_server)
-    t1.start()
-    t2.start()
+
 
  
 # 画面周期
