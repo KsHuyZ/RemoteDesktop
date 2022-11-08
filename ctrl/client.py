@@ -7,6 +7,7 @@ from tkinter import *
 import tkinter.messagebox
 import struct
 import socket
+import PySimpleGUI as Gui
 from turtle import color
 import numpy as np
 from PIL import Image, ImageTk
@@ -17,6 +18,7 @@ from cv2 import cv2
 import time
 import sys
 import platform
+from time import sleep
 import pyperclip
 from plyer import notification
 
@@ -236,6 +238,7 @@ def ShowScreen():
         showcan = tkinter.Toplevel(root)
         th = threading.Thread(target=run)
         th.start()
+
     else:
         soc.close()
         showcan.destroy()
@@ -345,6 +348,28 @@ def BindEvents(canvas):
         return EventDo(struct.pack('>BBHH', e.keycode, 117, int(e.x/scale), int(e.y/scale)))
     canvas.bind(sequence="<KeyPress>", func=KeyDown)
     canvas.bind(sequence="<KeyRelease>", func=KeyUp)
+
+
+# def loaingShow():
+#     popup = Toplevel(root)
+    
+#     for a in range(16):
+#         Label(popup, bg="#1F2732", width=2,
+#               height=1).place(x=(a+22)*22, y=350)
+#         Label(popup, text="Loading", bg="black",
+#               fg="#FFBD09").place(x=490, y=320)
+#     for i in range(200):
+#         for j in range(16):
+#             Label(popup, bg="#FFBD09", width=2,
+#                   height=1).place(x=(j+22)*22, y=350)
+#             sleep(0.06)
+#             popup.update_idletasks()
+#             Label(popup, bg="#1f2732", width=2,
+#                   height=1).place(x=(j+22)*22, y=350)
+
+
+
+# loaingShow()
 
 
 def run():

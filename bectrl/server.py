@@ -9,17 +9,15 @@ import time
 import pyautogui as ag
 import mouse
 from _keyboard import getKeycodeMapping
-
+from tkinter import messagebox
 
 
 port = 9999
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.connect(("8.8.8.8", 80))
+s.connect(("8.8.8.8", 140))
 ip = s.getsockname()[0]
 
 
-
- 
 # 画面周期
 IDLE = 0.05
 
@@ -28,7 +26,7 @@ SCROLL_NUM = 5
 
 bufsize = 1024
 
-host = ('0.0.0.0', 80)
+host = ('0.0.0.0', 140)
 # A TCP based echo server
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Bind the IP address and the port number
@@ -170,7 +168,14 @@ def handle(conn):
 
 while True:
     conn, addr = soc.accept()
-    threading.Thread(target=handle, args=(conn,)).start()
-    threading.Thread(target=ctrl, args=(conn,)).start()
+    answer =  messagebox.askyesno(title="Confirmation",
+                             message="Someone connected to you")
+    if(answer is True):
+        threading.Thread(target=handle, args=(conn,)).start()
+        threading.Thread(target=ctrl, args=(conn,)).start()
+        print("Starting listening connect!")
+
+    
     if soc.close():
+        print("Stop connected")
         break
